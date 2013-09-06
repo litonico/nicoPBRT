@@ -69,6 +69,7 @@ public:
     
     
     CoefficientSpectrum operator/(const CoefficientSpectrum &s2) const { //double-check
+        // assert != 0
         CoefficientSpectrum ret = *this;
         for (int i = 0; i < nSamples; ++i){
             ret.c[i] *= 1.f/s2.c[i];
@@ -118,9 +119,16 @@ static const int sampledLambdaStart = 400;
 static const int sampledLambdaEnd = 700;
 static const int nSpectralSamples = 30;
 
-
-
-
+class SampledSpectrum : public CoefficientSpectrum<nSpectralSamples>{
+public:
+    SampledSpectrum(float v = 0.f) {
+        for (int i = 0; i < nSpectralSamples; ++i){
+            c[i] = v;
+        }
+    }
+private:
+    
+}
 
 
 

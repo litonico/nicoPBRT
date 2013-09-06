@@ -10,7 +10,7 @@
 #define __nicoPBRT__BxDF__
 #include "geometry.h"
 
-enum BxDFType {
+enum BxDFType { //why enum, exactly?
     BSDF_REFLECTION     = 1<<0,
     BSDF_TRANSMISSION   = 1<<1,
     BSDF_DIFFUSE        = 1<<2,
@@ -35,7 +35,27 @@ public:
     virtual Spectrum Sample_f(const Vector &wo, const Vector *wi, float u1, float u2, float *pdf) const = 0;
 };
 
+class Fresnel {
+public:
+    virtual Spectrum Evaluate(float cosi) const = 0; //what
+}
 
+class FresnelConductor : public Fresnel{
+public:
+    Fresnel Conductor
+private:
+    Spectrum eta, k;
+}
+
+
+class Lambertian: public BxDF {
+public:
+    Lambertian(const Spectrum &reflectance)
+    : BxDF(BxDFType)
+    
+private:
+
+}
 
 
 

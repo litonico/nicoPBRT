@@ -9,7 +9,7 @@
 #ifndef __nicoPBRT__geometry__
 #define __nicoPBRT__geometry__
 #include "pbrt.h"
-#include <math.h>
+#include <math.h> 
 
 class Vector {
 public:
@@ -17,8 +17,9 @@ public:
     
     Vector() {x = y = z = 0.f;}
     
-    //check for NaNs
-    Vector(float xx, float yy, float zz): x(xx), y(yy), z(zz){
+    /* check for float NaNs, which imply bugs earlier in the calculation */
+    
+    Vector(float xx, float yy, float zz): x(xx), y(yy), z(zz){ //constructor
         Assert(!HasNaNs());
     }
     
@@ -30,7 +31,7 @@ public:
     Vector operator+(const Vector &v) const {
         return Vector(x + v.x, y + v.y, z + v.z);
     }
-    Vector& operator+(const Vector &v) { // why not const return? also, wherefore reference?
+    Vector& operator+=(const Vector &v) {
             x += v.x; y += v.y; z +=v.z;
             return *this;
     }
@@ -114,7 +115,7 @@ public:
     }
 };
 
-class Normal {
+class Normal { //why not inherit from Vector?
 public:
     float x, y, z;
     Normal() {
@@ -151,7 +152,7 @@ public:
     
     Normal operator[](int i) const {
         Assert(i >= 0 && i <= 2);
-        return (&x)[i];
+        return (&x)[i]; //what's wrong with this
     }
     
     // Length
@@ -187,9 +188,9 @@ Point operator()(float t) const {
 
 }
 
-class RayDifferential : public Ray { // Used in antialiasing
+class RayDifferential : public Ray { // a ray with offset information. Used in antialiasing + the recursive steps of raytracing
 public:
-    bool hasDifferentials
+    bool hasDifferentials;
     Point rxOrigin, ryOrigin;
     Vector rxDirection, ryDirection;
     
@@ -291,7 +292,7 @@ public:
     const Point &operator[](int i) const;
     Point &operator[](int i); //why two of them
     
-    Point Lerp(float tx, float ty, float tx) const {
+    Point Lerp(float tx, float ty, float tx) const { //linear interpolation
         return Point(::Lerp(tx, pMin.x, pMax.x), Lerp(ty, pMin.y, pMax.y), ::Lerp(tz, pMin.z, pMax.z));
     }
     
@@ -303,14 +304,14 @@ public:
     
     void BBox::BoundingSphere(Point *c, float *rad) const {
         *c = .5f * pMin + .5f * pMax;
-        *rad = Inside(*c) ? Distance(*c, pMax) : 0.f; //why are pointers used here
+        *rad = Inside(*c) ? Distance(*c, pMax) : 0.f; //why are pointers used here, not references?
     }
 }
 
-class Transform {
+class Transform { //unfinished, I think
 public:
     Transform() {}
-    Transform(const float mat[4][4]){
+    Transform(const float mat[4][4]){ // matrix mat, so why is it float?
         m = Matrix4x4(mat[0][0], mat[0][1], mat[0][2], mat[0][3],
                       mat[1][0], mat[1][1], mat[1][2], mat[1][3],
                       mat[2][0], mat[2][1], mat[2][2], mat[2][3],
@@ -404,9 +405,9 @@ inline Vector::Vector(const Normal &n):
 x(n.x), y(n.y), z(n.z){}
 
 
-// Construct Coordinate System
+// Construct Coordinate System from basis vectors
 inline void CoordinateSystem(const Vector &v1, const Vector &v2, const Vector &v3) {
-    if (fabsf(v1.x) > fabs(v1.y)) {
+    if (fabsf(v1.x) > fabsf(v1.y)) { //fabsf or fabs?
         float invlen = 1.f / sqrtf(v1.x*v1.x + v1.z * v1.z);
         *v2 = Vector(-v1.z * invlen, 0.f, v1.x*invlen);
     }
